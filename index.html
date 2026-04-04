@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>KÖZ MANGAL</title>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700;900&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+html{scroll-behavior:auto}
+body{font-family:'Poppins',sans-serif;background:#0d0806;color:#f5efe8;min-height:100vh;overflow-x:hidden}
+#scrollBar{position:fixed;top:0;left:0;height:3px;z-index:1000;background:linear-gradient(90deg,#e8531e,#d4a054);width:0%}
+#bgCanvas{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:.5}
+.hero{text-align:center;padding:55px 20px 25px;position:relative;z-index:1}
+.hero::before{content:'';position:absolute;top:0;left:50%;transform:translateX(-50%);width:260px;height:2px;background:linear-gradient(90deg,transparent,#e8531e,#d4a054,#e8531e,transparent)}
+.logo{font-family:'Playfair Display',serif;font-size:clamp(2.2rem,7vw,3.8rem);font-weight:900;background:linear-gradient(135deg,#ff6b35,#e8531e,#d4a054);-webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;letter-spacing:4px}
+.subtitle{color:#d4a054;font-size:.8rem;letter-spacing:8px;text-transform:uppercase;margin-top:8px;font-weight:300}
+.hero-stats{display:flex;justify-content:center;gap:36px;margin-top:22px;flex-wrap:wrap}
+.stat-num{font-family:'Playfair Display',serif;font-size:1.5rem;color:#e8531e;display:block}
+.stat-label{font-size:.62rem;color:#8a7a6a;letter-spacing:2px;text-transform:uppercase}
+.search-box{max-width:480px;margin:18px auto 0;position:relative}
+.search-box input{width:100%;padding:12px 18px 12px 44px;background:rgba(255,255,255,.04);border:1px solid rgba(255,120,50,.1);border-radius:50px;color:#f5efe8;font-family:inherit;font-size:.88rem;outline:none;transition:all .3s}
+.search-box input::placeholder{color:#8a7a6a}
+.search-box input:focus{border-color:#e8531e;box-shadow:0 0 0 3px rgba(232,83,30,.12)}
+.search-box i{position:absolute;left:16px;top:50%;transform:translateY(-50%);color:#8a7a6a;font-size:.85rem;pointer-events:none}
+.no-results{text-align:center;padding:50px 20px;color:#8a7a6a;display:none}
+.no-results i{font-size:2rem;color:#e8531e;display:block;margin-bottom:12px;opacity:.5}
+.cat-nav{position:sticky;top:0;z-index:100;background:rgba(13,8,6,.95);border-bottom:1px solid rgba(255,120,50,.08);padding:10px 0;transition:box-shadow .3s}
+.cat-nav.scrolled{box-shadow:0 8px 30px rgba(0,0,0,.5)}
+.nav-pills{display:flex;gap:6px;overflow-x:auto;padding:0 14px;scrollbar-width:none;justify-content:center;flex-wrap:wrap}
+.nav-pills::-webkit-scrollbar{display:none}
+.nav-pill{flex-shrink:0;padding:7px 15px;border-radius:50px;font-size:.73rem;font-weight:500;color:#8a7a6a;background:rgba(255,255,255,.03);border:1px solid transparent;cursor:pointer;transition:all .3s;white-space:nowrap;text-decoration:none}
+.nav-pill:hover{color:#f5efe8;background:rgba(255,255,255,.06)}
+.nav-pill.active{color:#fff;background:linear-gradient(135deg,#e8531e,#c4420f);border-color:#e8531e;box-shadow:0 4px 14px rgba(232,83,30,.3)}
+.pill-cnt{font-style:normal;display:inline-block;margin-left:4px;background:rgba(255,255,255,.15);padding:1px 6px;border-radius:20px;font-size:.58rem}
+.container{position:relative;z-index:1;max-width:760px;margin:0 auto;padding:14px 10px 60px}
+.card{margin-bottom:18px;background:rgba(255,120,50,.03);border-radius:14px;border:1px solid rgba(255,120,50,.08);overflow:visible;transition:border-color .3s,box-shadow .3s}
+.card:hover{border-color:rgba(255,120,50,.16);box-shadow:0 8px 28px rgba(232,83,30,.04)}
+.card.hidden{display:none}
+.card-head{background:linear-gradient(135deg,rgba(232,83,30,.1),rgba(212,160,84,.03));padding:15px 18px;display:flex;align-items:center;gap:12px;border-bottom:1px solid rgba(255,120,50,.08);border-radius:14px 14px 0 0;cursor:pointer;user-select:none;transition:background .3s}
+.card-head:hover{background:linear-gradient(135deg,rgba(232,83,30,.14),rgba(212,160,84,.05))}
+.card-ico{width:38px;height:38px;border-radius:10px;background:linear-gradient(135deg,rgba(232,83,30,.18),rgba(212,160,84,.08));display:flex;align-items:center;justify-content:center;font-size:1.15rem;flex-shrink:0}
+.card-head h2{font-family:'Playfair Display',serif;color:#f5efe8;font-size:1.08rem;font-weight:700;flex:1;letter-spacing:.4px}
+.card-cnt{font-size:.68rem;color:#8a7a6a;background:rgba(255,255,255,.04);padding:3px 10px;border-radius:20px}
+.card-chv{color:#8a7a6a;font-size:.72rem;transition:transform .3s}
+.card.collapsed .card-chv{transform:rotate(-90deg)}
+.card.collapsed .card-body{display:none}
+.menu-row{display:flex;justify-content:space-between;align-items:center;padding:12px 18px;border-bottom:1px solid rgba(255,255,255,.02);transition:background .2s,padding-left .2s;position:relative;gap:10px}
+.menu-row:last-child{border-bottom:none}
+.menu-row::after{content:'';position:absolute;left:0;top:50%;transform:translateY(-50%);width:3px;height:0;background:#e8531e;border-radius:0 3px 3px 0;transition:height .2s}
+.menu-row:hover{background:rgba(255,120,50,.04);padding-left:24px}
+.menu-row:hover::after{height:50%}
+.menu-row.hidden{display:none}
+.menu-name{font-size:.88rem;color:#f5efe8;flex:1;min-width:0}
+.menu-badge{display:inline-block;font-size:.53rem;font-weight:600;letter-spacing:.7px;text-transform:uppercase;padding:2px 6px;border-radius:4px;margin-left:4px;vertical-align:middle;background:linear-gradient(135deg,#e8531e,#c4420f);color:#fff}
+.menu-price{color:#f0c060;font-weight:700;font-size:.88rem;background:rgba(240,192,96,.08);border:1px solid rgba(240,192,96,.15);padding:5px 15px;border-radius:30px;white-space:nowrap;flex-shrink:0;flex-grow:0;min-width:fit-content;position:relative;z-index:5;transition:background .2s,border-color .2s}
+.menu-row:hover .menu-price{background:rgba(240,192,96,.14);border-color:rgba(240,192,96,.28)}
+footer{text-align:center;padding:32px 20px 36px;border-top:1px solid rgba(255,120,50,.08);position:relative;z-index:1}
+.footer-title{font-family:'Playfair Display',serif;font-size:1.2rem;color:#e8531e;display:block;margin-bottom:8px}
+.footer-info{color:#8a7a6a;font-size:.76rem;line-height:2.2}
+.footer-info i{color:#d4a054;margin-right:5px;width:14px}
+.footer-note{display:block;margin-top:14px;padding-top:14px;border-top:1px solid rgba(255,255,255,.03);color:rgba(138,122,106,.4);font-size:.6rem;letter-spacing:1px}
+#backTop{position:fixed;bottom:22px;right:22px;z-index:200;width:44px;height:44px;border-radius:50%;background:linear-gradient(135deg,#e8531e,#c4420f);color:#fff;border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;font-size:.95rem;box-shadow:0 4px 18px rgba(232,83,30,.3);opacity:0;transform:translateY(14px);pointer-events:none;transition:all .3s}
+#backTop.visible{opacity:1;transform:translateY(0);pointer-events:auto}
+@media(max-width:600px){.hero{padding:40px 14px 20px}.hero-stats{gap:18px}.stat-num{font-size:1.2rem}.nav-pills{justify-content:flex-start;flex-wrap:nowrap}.menu-row{padding:10px 14px;gap:8px}.menu-row:hover{padding-left:16px}.menu-name{font-size:.8rem}.menu-price{font-size:.78rem;padding:4px 11px}#backTop{bottom:14px;right:14px;width:40px;height:40px}}
+</style>
+</head>
+<body>
+<div id="scrollBar"></div>
+<canvas id="bgCanvas"></canvas>
+<header class="hero">
+<div class="logo">KÖZ MANGAL</div>
+<div class="subtitle">Geleneksel Lezzetler</div>
+<div class="hero-stats">
+<div><span class="stat-num" data-target="75">0</span><span class="stat-label">Ürün</span></div>
+<div><span class="stat-num" data-target="8">0</span><span class="stat-label">Kategori</span></div>
+<div><span class="stat-num" data-target="15">0</span><span class="stat-label">TL'den Başlayan</span></div>
+</div>
+<div class="search-box">
+<input type="text" id="searchInput" placeholder="Ürün ara... (örn: Adana, Pide)" autocomplete="off">
+<i class="fas fa-search"></i>
+</div>
+</header>
+<nav class="cat-nav" id="catNav">
+<div class="nav-pills">
+<a class="nav-pill active" data-target="cat-pide">🥙 Pide & Lahmacun <em class="pill-cnt">14</em></a>
+<a class="nav-pill" data-target="cat-ara">🥟 Ara Sıcak <em class="pill-cnt">5</em></a>
+<a class="nav-pill" data-target="cat-ev">🏠 Ev Yemekleri <em class="pill-cnt">13</em></a>
+<a class="nav-pill" data-target="cat-tavuk">🍗 Tavuk <em class="pill-cnt">5</em></a>
+<a class="nav-pill" data-target="cat-ocak">🔥 Ocakbaşı <em class="pill-cnt">14</em></a>
+<a class="nav-pill" data-target="cat-kebap">🥩 Kebaplar <em class="pill-cnt">17</em></a>
+<a class="nav-pill" data-target="cat-corba">🍲 Çorbalar <em class="pill-cnt">4</em></a>
+<a class="nav-pill" data-target="cat-icecek">🥤 İçecekler <em class="pill-cnt">9</em></a>
+</div>
+</nav>
+<main class="container">
+<div class="no-results" id="noResults"><i class="fas fa-fire-flame-curved"></i>Aramanızla eşleşen ürün bulunamadı.</div>
+<section class="card" id="cat-pide">
+<div class="card-head"><div class="card-ico">🥙</div><h2>Pide & Lahmacun</h2><span class="card-cnt">14 ürün</span><i class="fas fa-chevron-down card-chv"></i></div>
+<div class="card-body">
+<div class="menu-row"><span class="menu-name">Lahmacun</span><span class="menu-price">130 TL</span></div>
+<div class="menu-row"><span class="menu-name">Acısız Lahmacun</span><span class="menu-price">130 TL</span></div>
+<div class="menu-row"><span class="menu-name">Sarımsaklı Lahmacun</span><span class="menu-price">150 TL</span></div>
+<div class="menu-row"><span class="menu-name">Kaşarlı Lahmacun</span><span class="menu-price">150 TL</span></div>
+<div class="menu-row"><span class="menu-name">Cevizli Lahmacun</span><span class="menu-price">150 TL</span></div>
+<div class="menu-row"><span class="menu-name">Kaşarlı Pide</span><span class="menu-price">250 TL</span></div>
+<div class="menu-row"><span class="menu-name">Sucuklu Pide</span><span class="menu-price">300 TL</span></div>
+<div class="menu-row"><span class="menu-name">Kuşbaşılı Pide</span><span class="menu-price">320 TL</span></div>
+<div class="menu-row"><span class="menu-name">Kuşbaşılı Kaşarlı <span class="menu-badge">Popüler</span></span><span class="menu-price">350 TL</span></div>
+<div class="menu-row"><span class="menu-name">Kıymalı Pide</span><span class="menu-price">320 TL</span></div>
+<div class="menu-row"><span class="menu-name">Kıymalı Kaşarlı</span><span class="menu-price">350 TL</span></div>
+<div class="menu-row"><span class="menu-name">Karışık Pide <span class="menu-badge">Popüler</span></span><span class="menu-price">400 TL</span></div>
+<div class="menu-row"><span class="menu-name">Dönerli Pide</span><span class="menu-price">300 TL</span></div>
+<div class="menu-row"><span class="menu-name">Sebzeli Pide</span><span class="menu-price">300 TL</span></div>
+</div></section>
+<section class="card" id="cat-ara">
+<div class="card-head"><div class="card-ico">🥟</div><h2>Ara Sıcak</h2><span class="card-cnt">5 ürün</span><i class="fas fa-chevron-down card-chv"></i></div>
+<div class="card-body">
+<div class="menu-row"><span class="menu-name">Fındık Lahmacun</span><span class="menu-price">50 TL</span></div>
+<div class="menu-row"><span class="menu-name">İçli Köfte <span class="menu-badge">Popüler</span></span><span class="menu-price">90 TL</span></div>
+<div class="menu-row"><span class="menu-name">Şemsek</span><span class="menu-price">90 TL</span></div>
+<div class="menu-row"><span class="menu-name">Ağzı Açık</span><span class="menu-price">90 TL</span></div>
+<div class="menu-row"><span class="menu-name">Ağzı Yumuk</span><span class="menu-price">90 TL</span></div>
+</div></section>
+<section class="card" id="cat-ev">
+<div class="card-head"><div class="card-ico">🏠</div><h2>Ev Yemekleri</h2><span class="card-cnt">13 ürün</span><i class="fas fa-chevron-down card-chv"></i></div>
+<div class="card-body">
+<div class="menu-row"><span class="menu-name">Kuru Fasulye <span class="menu-badge">Popüler</span></span><span class="menu-price">200 TL</span></div>
+<div class="menu-row"><span class="menu-name">Güveç</span><span class="menu-price">200 TL</span></div>
+<div class="menu-row"><span class="menu-name">Çoban Kavurma</span><span class="menu-price">200 TL</span></div>
+<div class="menu-row"><span class="menu-name">Parmak Kebabı</span><span class="menu-price">200 TL</span></div>
+<div class="menu-row"><span class="menu-name">Orman Kebabı</span><span class="menu-price">200 TL</span></div>
+<div class="menu-row"><span class="menu-name">Musakka</span><span class="menu-price">200 TL</span></div>
+<div class="menu-row"><span class="menu-name">İzmir Köfte</span><span class="menu-price">200 TL</span></div>
+<div class="menu-row"><span class="menu-name">Karnıyarık</span><span class="menu-price">200 TL</span></div>
+<div class="menu-row"><span class="menu-name">Kazan Kebabı</span><span class="menu-price">200 TL</span></div>
+<div class="menu-row"><span class="menu-name">Sebzeli Kebap</span><span class="menu-price">200 TL</span></div>
+<div class="menu-row"><span class="menu-name">Etli Bezelye</span><span class="menu-price">200 TL</span></div>
+<div class="menu-row"><span class="menu-name">Kızartma (Karışık)</span><span class="menu-price">200 TL</span></div>
+<div class="menu-row"><span class="menu-name">Mantı</span><span class="menu-price">200 TL</span></div>
+</div></section>
+<section class="card" id="cat-tavuk">
+<div class="card-head"><div class="card-ico">🍗</div><h2>Tavuk</h2><span class="card-cnt">5 ürün</span><i class="fas fa-chevron-down card-chv"></i></div>
+<div class="card-body">
+<div class="menu-row"><span class="menu-name">Saç Tava Tavuk <span class="menu-badge">Popüler</span></span><span class="menu-price">400 TL</span></div>
+<div class="menu-row"><span class="menu-name">Tavuk Sote</span><span class="menu-price">200 TL</span></div>
+<div class="menu-row"><span class="menu-name">Tavuk Haşlama</span><span class="menu-price">200 TL</span></div>
+<div class="menu-row"><span class="menu-name">Kremalı Tavuk</span><span class="menu-price">200 TL</span></div>
+<div class="menu-row"><span class="menu-name">Tavuk Baget</span><span class="menu-price">200 TL</span></div>
+</div></section>
+<section class="card" id="cat-ocak">
+<div class="card-head"><div class="card-ico">🔥</div><h2>Ocakbaşı</h2><span class="card-cnt">14 ürün</span><i class="fas fa-chevron-down card-chv"></i></div>
+<div class="card-body">
+<div class="menu-row"><span class="menu-name">Kuşbaşı (Porsiyon) <span class="menu-badge">Popüler</span></span><span class="menu-price">450 TL</span></div>
+<div class="menu-row"><span class="menu-name">Kuşbaşı (Yarım)</span><span class="menu-price">325 TL</span></div>
+<div class="menu-row"><span class="menu-name">Terbiyesiz Kuşbaşı (Porsiyon)</span><span class="menu-price">450 TL</span></div>
+<div class="menu-row"><span class="menu-name">Terbiyesiz Kuşbaşı (Yarım)</span><span class="menu-price">325 TL</span></div>
+<div class="menu-row"><span class="menu-name">Tavuk Şiş (Porsiyon)</span><span class="menu-price">300 TL</span></div>
+<div class="menu-row"><span class="menu-name">Tavuk Şiş (Yarım)</span><span class="menu-price">200 TL</span></div>
+<div class="menu-row"><span class="menu-name">Terbiyesiz Tavuk (Porsiyon)</span><span class="menu-price">300 TL</span></div>
+<div class="menu-row"><span class="menu-name">Terbiyesiz Tavuk (Yarım)</span><span class="menu-price">200 TL</span></div>
+<div class="menu-row"><span class="menu-name">Ciğer (Porsiyon) <span class="menu-badge">Popüler</span></span><span class="menu-price">350 TL</span></div>
+<div class="menu-row"><span class="menu-name">Ciğer (Yarım)</span><span class="menu-price">250 TL</span></div>
+<div class="menu-row"><span class="menu-name">Yürek (Porsiyon)</span><span class="menu-price">350 TL</span></div>
+<div class="menu-row"><span class="menu-name">Yürek (Yarım)</span><span class="menu-price">250 TL</span></div>
+<div class="menu-row"><span class="menu-name">Dalak (Porsiyon)</span><span class="menu-price">350 TL</span></div>
+<div class="menu-row"><span class="menu-name">Dalak (Yarım)</span><span class="menu-price">250 TL</span></div>
+</div></section>
+<section class="card" id="cat-kebap">
+<div class="card-head"><div class="card-ico">🥩</div><h2>Kebaplar</h2><span class="card-cnt">17 ürün</span><i class="fas fa-chevron-down card-chv"></i></div>
+<div class="card-body">
+<div class="menu-row"><span class="menu-name">Adana (Porsiyon) <span class="menu-badge">Popüler</span></span><span class="menu-price">400 TL</span></div>
+<div class="menu-row"><span class="menu-name">Adana (Yarım)</span><span class="menu-price">300 TL</span></div>
+<div class="menu-row"><span class="menu-name">Sade Kebap (Porsiyon)</span><span class="menu-price">400 TL</span></div>
+<div class="menu-row"><span class="menu-name">Sade Kebap (Yarım)</span><span class="menu-price">300 TL</span></div>
+<div class="menu-row"><span class="menu-name">Haşhaş Kebap (Porsiyon)</span><span class="menu-price">400 TL</span></div>
+<div class="menu-row"><span class="menu-name">Haşhaş Kebap (Yarım)</span><span class="menu-price">300 TL</span></div>
+<div class="menu-row"><span class="menu-name">Patlıcanlı Kebap (Porsiyon)</span><span class="menu-price">450 TL</span></div>
+<div class="menu-row"><span class="menu-name">Patlıcanlı Kebap (Yarım)</span><span class="menu-price">250 TL</span></div>
+<div class="menu-row"><span class="menu-name">Domatesli Kebap (Porsiyon)</span><span class="menu-price">450 TL</span></div>
+<div class="menu-row"><span class="menu-name">Domatesli Kebap (Yarım)</span><span class="menu-price">250 TL</span></div>
+<div class="menu-row"><span class="menu-name">Soğanlı Kebap (Porsiyon)</span><span class="menu-price">450 TL</span></div>
+<div class="menu-row"><span class="menu-name">Soğanlı Kebap (Yarım)</span><span class="menu-price">250 TL</span></div>
+<div class="menu-row"><span class="menu-name">Birecik Kebap</span><span class="menu-price">500 TL</span></div>
+<div class="menu-row"><span class="menu-name">Siverek Kebap <span class="menu-badge">Popüler</span></span><span class="menu-price">600 TL</span></div>
+<div class="menu-row"><span class="menu-name">Urfa Karışık Kebap</span><span class="menu-price">450 TL</span></div>
+<div class="menu-row"><span class="menu-name">Tavuk Kanat</span><span class="menu-price">350 TL</span></div>
+<div class="menu-row"><span class="menu-name">Tavuk Pirzola</span><span class="menu-price">350 TL</span></div>
+</div></section>
+<section class="card" id="cat-corba">
+<div class="card-head"><div class="card-ico">🍲</div><h2>Çorbalar</h2><span class="card-cnt">4 ürün</span><i class="fas fa-chevron-down card-chv"></i></div>
+<div class="card-body">
+<div class="menu-row"><span class="menu-name">Mercimek Çorbası <span class="menu-badge">Popüler</span></span><span class="menu-price">110 TL</span></div>
+<div class="menu-row"><span class="menu-name">Yayla Çorbası</span><span class="menu-price">110 TL</span></div>
+<div class="menu-row"><span class="menu-name">Tavuk Çorbası</span><span class="menu-price">110 TL</span></div>
+<div class="menu-row"><span class="menu-name">Günün Çorbası</span><span class="menu-price">110 TL</span></div>
+</div></section>
+<section class="card" id="cat-icecek">
+<div class="card-head"><div class="card-ico">🥤</div><h2>İçecekler</h2><span class="card-cnt">9 ürün</span><i class="fas fa-chevron-down card-chv"></i></div>
+<div class="card-body">
+<div class="menu-row"><span class="menu-name">Su</span><span class="menu-price">15 TL</span></div>
+<div class="menu-row"><span class="menu-name">Küçük Ayran</span><span class="menu-price">30 TL</span></div>
+<div class="menu-row"><span class="menu-name">Büyük Ayran</span><span class="menu-price">35 TL</span></div>
+<div class="menu-row"><span class="menu-name">Soda</span><span class="menu-price">30 TL</span></div>
+<div class="menu-row"><span class="menu-name">Şalgam <span class="menu-badge">Popüler</span></span><span class="menu-price">70 TL</span></div>
+<div class="menu-row"><span class="menu-name">Şeftali</span><span class="menu-price">70 TL</span></div>
+<div class="menu-row"><span class="menu-name">Vişne</span><span class="menu-price">70 TL</span></div>
+<div class="menu-row"><span class="menu-name">Fuse Tea</span><span class="menu-price">70 TL</span></div>
+<div class="menu-row"><span class="menu-name">Kola</span><span class="menu-price">70 TL</span></div>
+</div></section>
+</main>
+<footer>
+<span class="footer-title">KÖZ MANGAL</span>
+<p class="footer-info">
+<span><i class="fas fa-map-marker-alt"></i> Adres bilgisi buraya eklenecek</span><br>
+<span><i class="fas fa-phone"></i> 0xxx xxx xx xx</span><br>
+<span><i class="fas fa-clock"></i> Her gün 11:00 – 23:00</span>
+</p>
+<small class="footer-note">Tüm fiyatlar KDV dahildir &bull; Fiyatlar değişebilir</small>
+</footer>
+<button id="backTop" aria-label="Yukarı çık"><i class="fas fa-arrow-up"></i></button>
+<script>
+(function(){
+var canvas=document.getElementById('bgCanvas'),ctx=canvas.getContext('2d'),W=0,H=0,particles=[];
+function resizeCanvas(){W=canvas.width=window.innerWidth;H=canvas.height=window.innerHeight}
+window.addEventListener('resize',resizeCanvas);resizeCanvas();
+function yeniParcacik(){return{x:Math.random()*W,y:H+Math.random()*100,vx:(Math.random()-0.5)*0.5,vy:-(0.3+Math.random()*0.8),boyut:1+Math.random()*2,omur:0,maxOmur:200+Math.random()*300,renk:15+Math.random()*25}}
+for(var i=0;i<30;i++){var p=yeniParcacik();p.y=Math.random()*H;p.omur=Math.random()*p.maxOmur;particles.push(p)}
+function parcacikCiz(){ctx.clearRect(0,0,W,H);if(particles.length<45&&Math.random()<0.2)particles.push(yeniParcacik());for(var i=particles.length-1;i>=0;i--){var p=particles[i];p.omur++;p.x+=p.vx+Math.sin(p.omur*0.02)*0.2;p.y+=p.vy;var ilerleme=p.omur/p.maxOmur,alpha=1;if(ilerleme<0.1)alpha=ilerleme*10;else if(ilerleme>0.7)alpha=(1-ilerleme)/0.3;var yaricap=Math.max(0.5,p.boyut*(1-ilerleme*0.5)),isik=yaricap*3,g=ctx.createRadialGradient(p.x,p.y,0,p.x,p.y,isik);g.addColorStop(0,'hsla('+p.renk+',100%,60%,'+(alpha*0.4)+')');g.addColorStop(0.5,'hsla('+p.renk+',90%,45%,'+(alpha*0.1)+')');g.addColorStop(1,'hsla('+p.renk+',80%,30%,0)');ctx.beginPath();ctx.arc(p.x,p.y,isik,0,Math.PI*2);ctx.fillStyle=g;ctx.fill();ctx.beginPath();ctx.arc(p.x,p.y,yaricap,0,Math.PI*2);ctx.fillStyle='hsla('+(p.renk+10)+',100%,75%,'+alpha+')';ctx.fill();if(p.omur>=p.maxOmur)particles.splice(i,1)}requestAnimationFrame(parcacikCiz)}
+parcacikCiz();
+var scrollBar=document.getElementById('scrollBar'),backTopBtn=document.getElementById('backTop'),catNav=document.getElementById('catNav'),searchInput=document.getElementById('searchInput'),noResults=document.getElementById('noResults'),pilller=document.querySelectorAll('.nav-pill'),kartlar=document.querySelectorAll('.card'),basliklar=document.querySelectorAll('.card-head'),sayaclar=document.querySelectorAll('.stat-num'),statsBox=document.querySelector('.hero-stats'),aramaZamanlayici=null,orijinalSayilar={};
+for(var i=0;i<kartlar.length;i++){orijinalSayilar[kartlar[i].id]=kartlar[i].querySelectorAll('.menu-row').length}
+window.addEventListener('scroll',function(){var st=window.scrollY,dh=document.documentElement.scrollHeight-window.innerHeight,pct=dh>0?(st/dh)*100:0;scrollBar.style.width=pct+'%';if(st>500)backTopBtn.classList.add('visible');else backTopBtn.classList.remove('visible');if(st>180)catNav.classList.add('scrolled');else catNav.classList.remove('scrolled');var aktifId='';for(var i=0;i<kartlar.length;i++){if(kartlar[i].classList.contains('hidden'))continue;var rect=kartlar[i].getBoundingClientRect();if(rect.top<=140)aktifId=kartlar[i].id}for(var j=0;j<pilller.length;j++){if(pilller[j].getAttribute('data-target')===aktifId)pilller[j].classList.add('active');else pilller[j].classList.remove('active')}});
+backTopBtn.addEventListener('click',function(){window.scrollTo({top:0,behavior:'smooth'})});
+for(var i=0;i<pilller.length;i++){pilller[i].addEventListener('click',function(e){e.preventDefault();for(var k=0;k<pilller.length;k++)pilller[k].classList.remove('active');this.classList.add('active');var hedefId=this.getAttribute('data-target'),hedefEl=document.getElementById(hedefId);if(hedefEl){var navYuksekligi=catNav.offsetHeight,kartTop=hedefEl.getBoundingClientRect().top+window.scrollY-navYuksekligi-10;window.scrollTo({top:kartTop,behavior:'smooth'})}})}
+for(var i=0;i<basliklar.length;i++){basliklar[i].addEventListener('click',function(){this.parentElement.classList.toggle('collapsed')})}
+searchInput.addEventListener('input',function(){if(aramaZamanlayici)clearTimeout(aramaZamanlayici);aramaZamanlayici=setTimeout(aramaYap,100)});
+searchInput.addEventListener('change',function(){if(searchInput.value.trim()==='')aramaSifirla()});
+function aramaYap(){var kelime=searchInput.value.trim().toLowerCase(),toplamGorunen=0;for(var i=0;i<kartlar.length;i++){var kart=kartlar[i],satirlar=kart.querySelectorAll('.menu-row'),gorunen=0;for(var j=0;j<satirlar.length;j++){var satir=satirlar[j],isimEl=satir.querySelector('.menu-name'),fiyatEl=satir.querySelector('.menu-price'),isim=isimEl?isimEl.textContent.toLowerCase():'',fiyat=fiyatEl?fiyatEl.textContent.toLowerCase():'',eslesme=(kelime==='')||(isim.indexOf(kelime)!==-1)||(fiyat.indexOf(kelime)!==-1);if(eslesme){satir.classList.remove('hidden');gorunen++}else satir.classList.add('hidden')}if(gorunen===0)kart.classList.add('hidden');else{kart.classList.remove('hidden');toplamGorunen+=gorunen;if(kelime!==''&&kart.classList.contains('collapsed'))kart.classList.remove('collapsed');var sayiEl=kart.querySelector('.card-cnt');if(sayiEl)sayiEl.textContent=gorunen+' ürün'}}if(kelime!==''&&toplamGorunen===0)noResults.style.display='block';else noResults.style.display='none'}
+function aramaSifirla(){for(var i=0;i<kartlar.length;i++){var kart=kartlar[i];kart.classList.remove('hidden');var satirlar=kart.querySelectorAll('.menu-row');for(var j=0;j<satirlar.length;j++)satirlar[j].classList.remove('hidden');var sayiEl=kart.querySelector('.card-cnt');if(sayiEl)sayiEl.textContent=orijinalSayilar[kart.id]+' ürün'}noResults.style.display='none'}
+var gozlemci=new IntersectionObserver(function(girisler){if(girisler[0].isIntersecting){for(var i=0;i<sayaclar.length;i++)sayaciBaslat(sayaclar[i]);gozlemci.disconnect()}},{threshold:0.5});
+if(statsBox)gozlemci.observe(statsBox);
+function sayaciBaslat(el){var hedef=parseInt(el.getAttribute('data-target'));if(isNaN(hedef))return;var baslangic=performance.now(),sure=1200;function guncelle(sonra){var gecen=sonra-baslangic,oran=gecen/sure;if(oran>1)oran=1;var yumusak=1-Math.pow(1-oran,3);el.textContent=Math.round(hedef*yumusak);if(oran<1)requestAnimationFrame(guncelle);else el.textContent=hedef}requestAnimationFrame(guncelle)}
+document.addEventListener('keydown',function(e){if((e.ctrlKey&&e.key==='k')||(e.key==='/'&&document.activeElement!==searchInput)){e.preventDefault();searchInput.focus();searchInput.select()}if(e.key==='Escape'&&document.activeElement===searchInput){searchInput.blur();searchInput.value='';aramaSifirla()}});
+})();
+</script>
+</body>
+</html>
